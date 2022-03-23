@@ -9,5 +9,9 @@ mod to_string;
 pub fn to_string(input: TokenStream) -> TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    proc_macro::TokenStream::from(to_string::impl_to_string(&ast))
+    let result = to_string::impl_to_string(&ast);
+    match result {
+        Ok(gen) => proc_macro::TokenStream::from(gen),
+        Err(err) => panic!("{}", err),
+    }
 }

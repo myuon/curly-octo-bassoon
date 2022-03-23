@@ -2,7 +2,7 @@ use proc_macro2::*;
 use quote::quote;
 use syn::DataEnum;
 
-pub fn get_variant_names(data: &DataEnum) -> Vec<String> {
+fn get_variant_names(data: &DataEnum) -> Vec<Ident> {
     let mut result = vec![];
     for variant in data.variants.iter() {
         if !variant.fields.is_empty() {
@@ -12,16 +12,20 @@ pub fn get_variant_names(data: &DataEnum) -> Vec<String> {
             panic!("#[derive(ToString)] does not support variant discriminants");
         }
 
-        result.push(variant.ident.to_string());
+        result.push(variant.ident.clone());
     }
 
     result
 }
 
-pub fn impl_to_string(ast: &syn::DeriveInput) -> TokenStream {
+fn get_value(variant: &Ident) -> String {
+    variant.to_string()
+}
+
+pub fn impl_to_string(ast: &syn::DeriveInput) -> Result<TokenStream, &str> {
     let data = match &ast.data {
         syn::Data::Enum(d) => d,
-        _ => panic!("#[derive(ToString)] is only defined for enums"),
+        _ => return Err("#[derive(ToString)] is only defined for enums"),
     };
     let variant_names = get_variant_names(data);
 
@@ -30,8 +34,10 @@ pub fn impl_to_string(ast: &syn::DeriveInput) -> TokenStream {
     let branches = variant_names
         .into_iter()
         .map(|v| {
+            let value = get_value(&v);
+
             quote!(
-                #name::#v => #v.to_string(),
+                #name::#v => #value.to_string(),
             )
         })
         .collect::<Vec<_>>();
@@ -45,5 +51,34 @@ pub fn impl_to_string(ast: &syn::DeriveInput) -> TokenStream {
         }
     };
 
-    gen.into()
+    Ok(gen.into())
+}
+
+#[test]
+fn test_impl_to_string() {
+    let cases = vec![(
+        r#"enum Test {
+                A,
+                B,
+            }"#,
+        quote! {
+            impl ToString for Test {
+                fn to_string(&self) -> String {
+                    match self {
+                        Test::A => "A".to_string(),
+                        Test::B => "B".to_string(),
+                    }
+                }
+            }
+        },
+    )];
+
+    for tt in cases {
+        pretty_assertions::assert_eq!(
+            impl_to_string(&syn::parse_str(tt.0).unwrap())
+                .unwrap()
+                .to_string(),
+            tt.1.to_string()
+        );
+    }
 }
