@@ -3,7 +3,7 @@ use quote::quote;
 
 use crate::util::{get_value, get_variant_names};
 
-pub fn impl_to_string(ast: &syn::DeriveInput) -> Result<TokenStream, &str> {
+pub fn impl_from_str(ast: &syn::DeriveInput) -> Result<TokenStream, &str> {
     let variant_names = get_variant_names(ast)?;
     let name = &ast.ident;
 
@@ -13,15 +13,18 @@ pub fn impl_to_string(ast: &syn::DeriveInput) -> Result<TokenStream, &str> {
             let value = get_value(&v);
 
             quote!(
-                #name::#v => #value.to_string(),
+                #value => Ok(#name::#v),
             )
         })
         .collect::<Vec<_>>();
     let gen = quote! {
-        impl ToString for #name {
-            fn to_string(&self) -> String {
-                match self {
+        impl FromStr for #name {
+            type Err = &'static str;
+
+            fn from_str(s: &str) -> Result<#name, Self::Err> {
+                match s {
                     #(#branches)*
+                    _ => Err(format!("Unknown variant: {}", s).as_str()),
                 }
             }
         }
@@ -31,18 +34,21 @@ pub fn impl_to_string(ast: &syn::DeriveInput) -> Result<TokenStream, &str> {
 }
 
 #[test]
-fn test_impl_to_string() {
+fn test_impl_from_str() {
     let cases = vec![(
         r#"enum Test {
                 A,
                 B,
             }"#,
         quote! {
-            impl ToString for Test {
-                fn to_string(&self) -> String {
-                    match self {
-                        Test::A => "A".to_string(),
-                        Test::B => "B".to_string(),
+            impl FromStr for Test {
+                type Err = &'static str;
+
+                fn from_str(s: &str) -> Result<Test, Self::Err> {
+                    match s {
+                        "A" => Ok(Test::A),
+                        "B" => Ok(Test::B),
+                        _ => Err(format!("Unknown variant: {}", s).as_str()),
                     }
                 }
             }
@@ -51,7 +57,7 @@ fn test_impl_to_string() {
 
     for tt in cases {
         pretty_assertions::assert_eq!(
-            impl_to_string(&syn::parse_str(tt.0).unwrap())
+            impl_from_str(&syn::parse_str(tt.0).unwrap())
                 .unwrap()
                 .to_string(),
             tt.1.to_string()
