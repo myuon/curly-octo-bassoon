@@ -1,6 +1,7 @@
 pub use labelled_enum_derive::*;
 
 // Working with serde
+#[cfg(feature = "serde")]
 pub mod serde_plugin {
     use serde::*;
     use std::str::FromStr;
