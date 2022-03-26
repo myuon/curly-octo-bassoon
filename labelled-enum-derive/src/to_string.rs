@@ -1,10 +1,16 @@
 use proc_macro2::*;
 use quote::quote;
+use syn::{spanned::Spanned, Result};
 
-use crate::util::{get_value, get_variant_names};
+use crate::{
+    attr::get_label_options,
+    util::{get_value, get_variant_names},
+};
 
-pub fn impl_to_string(ast: syn::DeriveInput) -> Result<TokenStream, &'static str> {
-    let variant_names = get_variant_names(ast.data)?;
+pub fn impl_to_string(ast: syn::DeriveInput) -> Result<TokenStream> {
+    let span = ast.span();
+    let variant_names = get_variant_names(ast.data, span)?;
+    let options = get_label_options(ast.attrs)?;
     let name = &ast.ident;
 
     let branches = variant_names

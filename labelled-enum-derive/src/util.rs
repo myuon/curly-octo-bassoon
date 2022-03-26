@@ -1,19 +1,30 @@
-use proc_macro2::Ident;
-use syn::Data;
+use proc_macro2::{Ident, Span};
+use syn::{spanned::Spanned, Data, Error, Result};
 
-pub fn get_variant_names(input: Data) -> Result<Vec<Ident>, &'static str> {
+pub fn get_variant_names(input: Data, span: Span) -> Result<Vec<Ident>> {
     let data = match input {
         syn::Data::Enum(d) => d,
-        _ => return Err("#[derive(ToString)] is only defined for enums"),
+        _ => {
+            return Err(Error::new(
+                span,
+                "#[derive(ToString)] is only defined for enums",
+            ))
+        }
     };
 
     let mut result = vec![];
     for variant in data.variants.iter() {
         if !variant.fields.is_empty() {
-            return Err("#[derive(ToString)] does not support variant with fields");
+            return Err(Error::new(
+                variant.fields.span(),
+                "#[derive(ToString)] does not support variant with fields",
+            ));
         }
         if variant.discriminant.is_some() {
-            return Err("#[derive(ToString)] does not support variant discriminants");
+            return Err(Error::new(
+                variant.discriminant.as_ref().unwrap().0.span(),
+                "#[derive(ToString)] does not support variant discriminants",
+            ));
         }
 
         result.push(variant.ident.clone());
