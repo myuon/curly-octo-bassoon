@@ -1,4 +1,4 @@
-# labelled-enum
+# labelled-enum [![labelled-enum at crates.io](https://img.shields.io/crates/v/labelled-enum.svg)](https://crates.io/crates/labelled-enum) [![labelled-enum at docs.rs](https://docs.rs/labelled-enum/badge.svg)](https://docs.rs/labelled-enum)
 
 Converting an enum to/from String.
 
