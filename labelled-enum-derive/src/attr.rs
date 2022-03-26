@@ -6,6 +6,8 @@ use syn::{
     Result,
 };
 
+use crate::rename::Casing;
+
 // attr example: label(rename_all = "{camelCase, snake_case, kebab-case}")
 
 struct KeyValue {
@@ -40,14 +42,8 @@ impl Parse for AttrInput {
     }
 }
 
-pub enum Casing {
-    CamelCase,
-    SnakeCase,
-    KebabCase,
-}
-
 pub struct LabelOptions {
-    rename_all: Option<Casing>,
+    pub rename_all: Option<Casing>,
 }
 
 pub fn get_label_options(attrs: Vec<syn::Attribute>) -> Result<LabelOptions> {

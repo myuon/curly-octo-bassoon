@@ -4,6 +4,7 @@ use syn::{spanned::Spanned, Result};
 
 use crate::{
     attr::get_label_options,
+    rename::rename,
     util::{get_value, get_variant_names},
 };
 
@@ -16,7 +17,7 @@ pub fn impl_to_string(ast: syn::DeriveInput) -> Result<TokenStream> {
     let branches = variant_names
         .into_iter()
         .map(|v| {
-            let value = get_value(&v);
+            let value = rename(&options.rename_all, get_value(&v));
 
             quote!(
                 #name::#v => #value.to_string(),

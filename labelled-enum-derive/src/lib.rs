@@ -5,6 +5,7 @@ extern crate proc_macro;
 
 mod attr;
 mod from_str;
+mod rename;
 mod to_string;
 mod util;
 
