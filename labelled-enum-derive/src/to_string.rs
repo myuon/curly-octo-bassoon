@@ -3,8 +3,8 @@ use quote::quote;
 
 use crate::util::{get_value, get_variant_names};
 
-pub fn impl_to_string(ast: &syn::DeriveInput) -> Result<TokenStream, &str> {
-    let variant_names = get_variant_names(ast)?;
+pub fn impl_to_string(ast: syn::DeriveInput) -> Result<TokenStream, &'static str> {
+    let variant_names = get_variant_names(ast.data)?;
     let name = &ast.ident;
 
     let branches = variant_names
@@ -51,7 +51,7 @@ fn test_impl_to_string() {
 
     for tt in cases {
         pretty_assertions::assert_eq!(
-            impl_to_string(&syn::parse_str(tt.0).unwrap())
+            impl_to_string(syn::parse_str(tt.0).unwrap())
                 .unwrap()
                 .to_string(),
             tt.1.to_string()

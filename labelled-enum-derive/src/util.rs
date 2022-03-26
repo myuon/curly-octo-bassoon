@@ -1,7 +1,8 @@
 use proc_macro2::Ident;
+use syn::Data;
 
-pub fn get_variant_names(ast: &syn::DeriveInput) -> Result<Vec<Ident>, &str> {
-    let data = match &ast.data {
+pub fn get_variant_names(input: Data) -> Result<Vec<Ident>, &'static str> {
+    let data = match input {
         syn::Data::Enum(d) => d,
         _ => return Err("#[derive(ToString)] is only defined for enums"),
     };
