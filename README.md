@@ -31,9 +31,11 @@ enum Test {
 
 ## Working with [serde](https://serde.rs)
 
-labelled-enum provides `serde_plugin` module to work with serde Serializer/Deserializer:
+labelled-enum provides `serde_plugin` feature to work with serde Serializer/Deserializer:
 
 ```rust
+// install labelled-enum with --features serde_plugin
+
 #[derive(Serialize, Deserialize)]
 struct Wrapper {
     #[serde(with = "labelled_enum::serde_plugin")]
