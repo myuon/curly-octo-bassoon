@@ -1,6 +1,6 @@
-use std::{collections::HashMap, panic};
+use std::panic;
 
-use proc_macro2::{Ident, TokenStream};
+use proc_macro2::Ident;
 use syn::{
     parse::{Parse, ParseStream},
     Result,
@@ -8,8 +8,7 @@ use syn::{
 
 use crate::rename::Casing;
 
-// attr example: label(rename_all = "{camelCase, snake_case, kebab-case}")
-
+#[allow(unused)]
 struct KeyValue {
     key: Ident,
     punct: syn::Token![=],
@@ -26,6 +25,7 @@ impl Parse for KeyValue {
     }
 }
 
+#[allow(unused)]
 struct AttrInput {
     paren: syn::token::Paren,
     pairs: syn::punctuated::Punctuated<KeyValue, syn::Token![,]>,
