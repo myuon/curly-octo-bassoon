@@ -25,7 +25,7 @@ pub fn impl_to_string(ast: syn::DeriveInput) -> Result<TokenStream> {
         })
         .collect::<Vec<_>>();
     let gen = quote! {
-        impl ToString for #name {
+        impl std::string::ToString for #name {
             fn to_string(&self) -> String {
                 match self {
                     #(#branches)*
@@ -45,7 +45,7 @@ fn test_impl_to_string() {
                 B,
             }"#,
         quote! {
-            impl ToString for Test {
+            impl std::string::ToString for Test {
                 fn to_string(&self) -> String {
                     match self {
                         Test::A => "A".to_string(),

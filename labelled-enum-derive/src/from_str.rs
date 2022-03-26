@@ -25,13 +25,13 @@ pub fn impl_from_str(ast: syn::DeriveInput) -> Result<TokenStream> {
         })
         .collect::<Vec<_>>();
     let gen = quote! {
-        impl FromStr for #name {
-            type Err = &'static str;
+        impl std::str::FromStr for #name {
+            type Err = String;
 
             fn from_str(s: &str) -> Result<#name, Self::Err> {
                 match s {
                     #(#branches)*
-                    _ => Err(format!("Unknown variant: {}", s).as_str()),
+                    _ => Err(format!("Unknown variant: {}", s)),
                 }
             }
         }
@@ -48,14 +48,14 @@ fn test_impl_from_str() {
                 B,
             }"#,
         quote! {
-            impl FromStr for Test {
-                type Err = &'static str;
+            impl std::str::FromStr for Test {
+                type Err = String;
 
                 fn from_str(s: &str) -> Result<Test, Self::Err> {
                     match s {
                         "A" => Ok(Test::A),
                         "B" => Ok(Test::B),
-                        _ => Err(format!("Unknown variant: {}", s).as_str()),
+                        _ => Err(format!("Unknown variant: {}", s)),
                     }
                 }
             }
